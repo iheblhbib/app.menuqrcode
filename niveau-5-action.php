@@ -4,6 +4,9 @@ include('../config.menuqrcode/config.php');
 
 $object = new application(); 
 
+include_once(__DIR__ . '/securite.php');
+securite_exiger_connexion($object);
+
 $market = json_decode($object->get_market($_POST['market'])); 
 
 $page_actuel = $object->get_page_url();
@@ -920,9 +923,11 @@ function upload_background()
 function upload_file()
 {
     if (isset($_FILES["pdf"])) {
-        $filename = $_FILES['pdf']['name'];
-        $extension = pathinfo($filename, PATHINFO_EXTENSION);
-        $new_name = rand() . '.' . $extension;
+        // uniquement de vrais fichiers PDF, sous un nom aléatoire
+        $new_name = securite_nom_fichier($_FILES['pdf'], array('pdf'));
+        if ($new_name === false) {
+            securite_refuser(400, 'Seuls les fichiers PDF sont acceptés.');
+        }
         $destination = 'pdf/' . $new_name;
         move_uploaded_file($_FILES['pdf']['tmp_name'], $destination);
         return $destination;

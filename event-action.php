@@ -4,6 +4,9 @@ include('../config.menuqrcode/config.php');
 
 $object = new application(); 
 
+include_once(__DIR__ . '/securite.php');
+securite_exiger_connexion($object);
+
 $page_actuel = $object->get_page_url();
 
 if(isset($_POST["action"]))
@@ -383,9 +386,11 @@ if(isset($_POST["action"]))
  function upload_image()
 {
     if (isset($_FILES['banner'])) {
-        $filename = $_FILES['banner']['name'];
-        $extension = pathinfo($filename, PATHINFO_EXTENSION);
-        $new_name = $filename . '-' . rand() . '.' . $extension; 
+        // uniquement des images, sous un nom aléatoire (jamais le nom d'origine)
+        $new_name = securite_nom_fichier($_FILES['banner'], array('jpg', 'jpeg', 'png', 'webp', 'gif'));
+        if ($new_name === false) {
+            securite_refuser(400, 'Format de bannière non autorisé (JPG, PNG, WEBP ou GIF).');
+        }
         $destination = '../app.menuqrcode.tn/img/' . $new_name;
         move_uploaded_file($_FILES['banner']['tmp_name'], $destination);
         return $destination;

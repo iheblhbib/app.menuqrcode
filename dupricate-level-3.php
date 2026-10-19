@@ -1,5 +1,11 @@
 <?php
 
+    // script ponctuel de copie de menu : exécutable uniquement en ligne de commande, jamais depuis le web
+    if (php_sapi_name() !== 'cli') {
+        http_response_code(403);
+        exit('Accès refusé.');
+    }
+
     include('../config.menuqrcode/config.php');
     
     $object = new application(); 

@@ -1,18 +1,21 @@
 <?php 
 
 include('../config.menuqrcode/config.php'); 
+include_once(__DIR__ . '/securite.php');
     
     $object = new application(); 
      
     if(!$object->is_login())
     {
         header("location:".$object->client_url."login");
+        exit();
     }
     
      
     if(!$object->is_user_actif($_SESSION['id']))
     {
         header("location:".$object->client_url."logout");
+        exit();
     }
     
     $page_actuel = $object->get_page_url();
@@ -30,20 +33,29 @@ include('../config.menuqrcode/config.php');
     // information d'utilisateur
     $user = json_decode($object->get_user($_SESSION['id'])); 
     
-    if($_POST['market']){
+    // le point de vente choisi doit appartenir à l'utilisateur connecté
+    if(!empty($_POST['market']) && securite_market_autorise($object, $_POST['market'])){
         $_SESSION['market'] = $_POST['market'] ;
     } 
+    
+    if(!empty($_SESSION['market']) && !securite_market_autorise($object, $_SESSION['market']))
+    {
+        unset($_SESSION['market']);
+    }
       
     if(empty($_SESSION['market']))
     {
         header("location:".$object->client_url."select");
+        exit();
     }
     
     $market = json_decode($object->get_market($_SESSION['market'])); 
     
-    if($object->route($user->id, $page_actuel) == '1' )
+    // page interdite à cet employé (sauf l'accueil, pour éviter une boucle de redirection)
+    if($object->route($user->id, $page_actuel) == '1' && $page_actuel != 'index')
     {
         header("Location: ".$object->client_url);
+        exit();
     }
 
 ?>

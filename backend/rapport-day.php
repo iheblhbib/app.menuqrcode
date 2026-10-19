@@ -30,6 +30,9 @@
 
 
 $object = new application(); 
+
+include_once(__DIR__ . '/../securite.php');
+securite_exiger_connexion($object);
 $data = array();
 
 // Requête optimisée qui compte les accès groupés par heure

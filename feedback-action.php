@@ -5,6 +5,12 @@ include('../config.menuqrcode/config.php');
     
 $object = new application(); 
 
+include_once(__DIR__ . '/securite.php');
+// l'envoi d'un avis (action feedback) vient du menu public : pas de session
+if (!isset($_POST['action']) || $_POST['action'] != 'feedback') {
+    securite_exiger_connexion($object);
+}
+
 $page_actuel = $object->get_page_url();
 
 // $rating = ['--','☆','☆☆','☆☆☆','☆☆☆☆','☆☆☆☆☆']; 
