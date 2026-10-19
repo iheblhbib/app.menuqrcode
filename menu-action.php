@@ -58,8 +58,13 @@ function plannings($pdo, $market_id, $type)
 {
     $map = [];
     $by = [];
-    foreach (rows($pdo, "SELECT id_element, jour, heure_debut, heure_fin, planning_actif FROM planning
-                         WHERE market = ? AND type = ? ORDER BY heure_debut, jour", [$market_id, $type]) as $r) {
+    try {
+        $list = rows($pdo, "SELECT id_element, jour, heure_debut, heure_fin, planning_actif FROM planning
+                            WHERE market = ? AND type = ? ORDER BY heure_debut, jour", [$market_id, $type]);
+    } catch (Exception $e) {
+        return [];   // table planning absente : l'éditeur fonctionne sans
+    }
+    foreach ($list as $r) {
         $by[$r['id_element']][] = $r;
     }
     foreach ($by as $id => $list) {

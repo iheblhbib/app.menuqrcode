@@ -294,11 +294,20 @@
         initSortable(lvl);
     }
 
+    /* footer.php charge aussi vendor/jquery/jquery-sortable.js, qui écrase $.fn.sortable de jQuery UI.
+       On reprend donc le widget jQuery UI sous un autre nom pour ne dépendre que de lui. */
+    function uiSortable() {
+        if (!$.ui || !$.ui.sortable || !$.widget || !$.widget.bridge) { return false; }
+        if (!$.fn.meSortable) { $.widget.bridge('meSortable', $.ui.sortable); }
+        return true;
+    }
+
     function initSortable(lvl) {
         var $l = $('#meList');
-        if ($l.data('ui-sortable')) { $l.sortable('destroy'); }
-        if (!$.fn.sortable || !can(lvl, 'u') || state.etat !== '0' || state.mode !== 'list') { return; }
-        $l.sortable({
+        if (!uiSortable()) { return; }
+        if ($l.data('ui-sortable')) { $l.meSortable('destroy'); }
+        if (!can(lvl, 'u') || state.etat !== '0' || state.mode !== 'list') { return; }
+        $l.meSortable({
             handle: '.me-handle', items: '> .me-row', axis: 'y', tolerance: 'pointer', placeholder: 'me-row-placeholder',
             update: function () {
                 var ids = $l.children('.me-row').map(function () { return $(this).data('id'); }).get();
@@ -503,6 +512,10 @@
         toggleSection('#meForm [data-parent]', level < N);
         toggleSection('#meForm [data-vip]', CFG.vip && level === N);
         fillParents(level, parentId);
+        // Icône, VIP et prix/note ne sont plus affichés, mais restent actifs : leur valeur actuelle
+        // repart telle quelle à l'enregistrement (sinon Edit les remettrait à vide).
+        $('#meForm .me-keep').addClass('d-none');
+        $('#meGeneral').toggle(level < N || level === 1);
 
         setPreview('');
         $('#meDisplayImage').prop('checked', true);
@@ -616,30 +629,54 @@
         });
     }
 
-    function translate(code) {
+    /* Un seul bouton (onglet FR) : traduit le nom, et pour un article la description, vers toutes les langues.
+       Le prix est recopié dans les langues où il est vide. */
+    function translateAll() {
+        var codes = CFG.langues.map(function (l) { return l.code; });
         var src = $.trim($('#libelle').val());
+        if (!codes.length) { return; }
         if (!src) {
+            $('#libelle').addClass('me-field-error').trigger('focus');
             toast.fire({ icon: 'info', title: "Saisissez d'abord le nom en français." });
-            showLang('fr');
             return;
         }
         var url = ed.level === 1 ? 'api/translate-article.php' : 'api/translate.php';
-        var $b = $('#meForm .me-translate[data-lang="' + code + '"]');
+        var $b = $('#meTranslateAll');
         var html = $b.html();
+        var manquantes = [];
         $b.prop('disabled', true).html('<i class="fa-light fa-spinner fa-spin"></i> Traduction…');
-        var calls = [$.ajax({ url: url, method: 'POST', dataType: 'json', data: { text: src, targets: [code] } }).done(function (r) {
-            if (r && r.success && r.translations && r.translations[code]) { $('#libelle' + code).val(r.translations[code]); }
+
+        var calls = [$.ajax({ url: url, method: 'POST', dataType: 'json', data: { text: src, targets: codes } }).done(function (r) {
+            codes.forEach(function (c) {
+                if (r && r.translations && r.translations[c]) {
+                    $('#libelle' + c).val(r.translations[c]).removeClass('me-field-error');
+                } else {
+                    manquantes.push(c.toUpperCase());
+                }
+            });
         })];
         if (ed.level === 1) {
-            if (!$.trim($('#prix' + code).val())) { $('#prix' + code).val($('#prix').val()); }
+            codes.forEach(function (c) {
+                if (!$.trim($('#prix' + c).val())) { $('#prix' + c).val($('#prix').val()).removeClass('me-field-error'); }
+            });
             var desc = quills.fr ? quills.fr.getText().trim() : '';
             if (desc) {
-                calls.push($.ajax({ url: url, method: 'POST', dataType: 'json', data: { text: desc, targets: [code] } }).done(function (r) {
-                    if (r && r.success && r.translations && r.translations[code]) { setQuill(code, r.translations[code]); }
+                calls.push($.ajax({ url: url, method: 'POST', dataType: 'json', data: { text: desc, targets: codes } }).done(function (r) {
+                    codes.forEach(function (c) {
+                        if (r && r.translations && r.translations[c]) { setQuill(c, r.translations[c]); }
+                    });
                 }));
             }
         }
+
         $.when.apply($, calls)
+            .done(function () {
+                if (manquantes.length) {
+                    toast.fire({ icon: 'warning', title: 'Non traduit : ' + manquantes.join(', ') + '. Complétez à la main.' });
+                } else {
+                    toast.fire({ icon: 'success', title: 'Traduit dans toutes les langues' });
+                }
+            })
             .fail(function () { toast.fire({ icon: 'error', title: 'Traduction indisponible, saisissez-la à la main.' }); })
             .always(function () {
                 $b.prop('disabled', false).html(html);
@@ -727,7 +764,7 @@
         // éditeur
         $('#meForm').on('submit', save);
         $('#meForm').on('click', '.me-lang', function () { showLang($(this).data('lang')); });
-        $('#meForm').on('click', '.me-translate', function () { translate($(this).data('lang')); });
+        $('#meForm').on('click', '#meTranslateAll', translateAll);
         $('#meForm').on('input', 'input[data-fr], input[data-tr]', function () {
             $(this).removeClass('me-field-error');
             updateDots();
@@ -751,6 +788,7 @@
     $(function () {
         state.open = store('me-open-' + CFG.market) || {};
         setupQuills();
+        // Options par défaut : compatible Bootstrap 5.0 → 5.3 (« backdrop: 'static' » n'existe qu'à partir de 5.2)
         editor = new bootstrap.Offcanvas(document.getElementById('meEditor'));
         bind();
         loadTree().done(function () {

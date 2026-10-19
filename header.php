@@ -337,6 +337,12 @@ include('../config.menuqrcode/config.php');
         <?php   if($market->varie == 'single'){  ?>
         
             <li class="nav-heading">Menu </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed pagemenu" href="menu">
+                    <img src="img/menu.png" class="image-header" alt="profile-image"> 
+                    <span>Mon menu <span class="badge bg-success ms-1" style="font-size:10px;">Nouveau</span></span> 
+                </a>
+            </li>
             <?php   if($market->niveau == '4'){  ?>
                    <li class="nav-item">
                     <a class="nav-link collapsed pageniveau-1 pageniveau-2  pageniveau-3 pageniveau-4"  <?= ($object->route($user->id, 'niveau-4') == '1') ? 'style="background: #dee2e6;"' : 'href="niveau-4"' ?>>
