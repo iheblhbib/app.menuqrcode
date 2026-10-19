@@ -400,7 +400,7 @@ if (isset($_POST["action"])) {
 				':display_image'		        =>	($_POST["display_image"]) , 
 				':vip'		                    =>	($_POST["vip"]) ?  $_POST["vip"] : '1' , 
 				':code_vip'		                =>	($_POST["vip"] == '2') ? ($_POST["code_vip"]) : null ,  
-				':etat_prix'		            =>	($_POST["etat_prix"]) , 
+				':etat_prix'		            =>	(!empty($_POST["etat_prix"]) ? $_POST["etat_prix"] : "1") , 
 				':prix'		                    =>	($_POST["prix"] ) ? ($_POST["prix"]) : null , 
 			);
             
@@ -587,7 +587,7 @@ if (isset($_POST["action"])) {
 				':display_image'		        =>	($_POST["display_image"]) ,
 				':vip'		                    =>	($_POST["vip"]) ?  $_POST["vip"] : '1' , 
 				':code_vip'		                =>	($_POST["vip"] == '2') ? ($_POST["code_vip"]) : null ,  
-			    ':etat_prix'		            =>	($_POST["etat_prix"]) , 
+			    ':etat_prix'		            =>	(!empty($_POST["etat_prix"]) ? $_POST["etat_prix"] : "1") , 
 				':prix'		                    =>	($_POST["prix"] ) ? ($_POST["prix"]) : null , 
 				':id'                           => $_POST['hidden_id'],
 				

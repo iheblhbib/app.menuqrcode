@@ -89,7 +89,7 @@ $v = function ($f) { return $f . '?v=' . @filemtime($f); };
 </main>
 
 <!-- ========== Panneau d'édition ========== -->
-<div class="offcanvas offcanvas-end me-editor" tabindex="-1" id="meEditor" aria-labelledby="meEditorTitle" data-bs-backdrop="static">
+<div class="offcanvas offcanvas-end me-editor" tabindex="-1" id="meEditor" aria-labelledby="meEditorTitle">
     <form id="meForm" enctype="multipart/form-data" novalidate class="d-flex flex-column h-100">
         <div class="offcanvas-header">
             <div>
@@ -114,7 +114,14 @@ $v = function ($f) { return $f . '?v=' . @filemtime($f); };
                 <?php } ?>
 
                 <div class="me-lang-pane active" data-lang="fr">
-                    <label class="form-label" for="libelle">Nom <span class="text-danger">*</span></label>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label mb-0" for="libelle">Nom <span class="text-danger">*</span></label>
+                        <?php if ($langues) { ?>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="meTranslateAll">
+                                <i class="fa-light fa-language"></i> Traduire dans toutes les langues
+                            </button>
+                        <?php } ?>
+                    </div>
                     <input type="text" class="form-control" name="libelle" id="libelle" maxlength="150" data-fr="libelle">
                     <div class="me-only" data-levels="1">
                         <label class="form-label mt-3" for="prix">Prix <span class="text-danger">*</span></label>
@@ -130,12 +137,7 @@ $v = function ($f) { return $f . '?v=' . @filemtime($f); };
 
                 <?php foreach ($langues as $l) { $c = $l['code']; ?>
                     <div class="me-lang-pane" data-lang="<?= $c ?>">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-muted small"><?= htmlspecialchars($l['libelle']) ?></span>
-                            <button type="button" class="btn btn-sm btn-outline-primary me-translate" data-lang="<?= $c ?>">
-                                <i class="fa-light fa-language"></i> Traduire depuis FR
-                            </button>
-                        </div>
+                        <div class="text-muted small mb-2"><?= htmlspecialchars($l['libelle']) ?></div>
                         <label class="form-label" for="libelle<?= $c ?>">Nom <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="libelle<?= $c ?>" id="libelle<?= $c ?>" maxlength="150" data-tr="libelle">
                         <div class="me-only" data-levels="1">
@@ -153,7 +155,7 @@ $v = function ($f) { return $f . '?v=' . @filemtime($f); };
             </section>
 
             <!-- Champs communs -->
-            <section class="me-card">
+            <section class="me-card" id="meGeneral">
                 <h6 class="me-card-title">Général</h6>
                 <div class="row g-3">
                     <div class="col-12 me-only" data-parent="1">
@@ -161,7 +163,7 @@ $v = function ($f) { return $f . '?v=' . @filemtime($f); };
                         <select class="form-select" name="categorie" id="meParent"></select>
                     </div>
 
-                    <div class="col-sm-6 me-only" data-levels="2,3">
+                    <div class="col-sm-6 me-only me-keep" data-levels="2,3">
                         <label class="form-label" for="icon">Icône</label>
                         <select class="form-select" name="icon" id="icon"><?= $options_icones ?></select>
                     </div>
@@ -179,27 +181,27 @@ $v = function ($f) { return $f . '?v=' . @filemtime($f); };
                         <select class="selectpicker" name="allergens[]" id="allergens" multiple data-live-search="true" data-size="6" title="Aucun" data-width="100%"><?= $options_allergenes ?></select>
                     </div>
 
-                    <div class="col-sm-5 me-only" data-levels="2">
+                    <div class="col-sm-5 me-only me-keep" data-levels="2">
                         <label class="form-label" for="etat_prix">Prix / note</label>
                         <select class="form-select" name="etat_prix" id="etat_prix">
                             <option value="1">Masqué</option>
                             <option value="2">Affiché</option>
                         </select>
                     </div>
-                    <div class="col-sm-7 me-only" data-levels="2" id="meNoteWrap">
+                    <div class="col-sm-7 me-only me-keep" data-levels="2" id="meNoteWrap">
                         <label class="form-label" for="meNote">Texte affiché</label>
                         <input type="text" class="form-control" name="prix" id="meNote" placeholder="à partir de 15 DT">
                     </div>
 
                     <?php if ($market->vip == '2') { ?>
-                        <div class="col-sm-5 me-only" data-vip="1">
+                        <div class="col-sm-5 me-only me-keep" data-vip="1">
                             <label class="form-label" for="vip">Accès VIP</label>
                             <select class="form-select" name="vip" id="vip">
                                 <option value="1">Non</option>
                                 <option value="2">Oui</option>
                             </select>
                         </div>
-                        <div class="col-sm-7 me-only" data-vip="1" id="meCodeVipWrap">
+                        <div class="col-sm-7 me-only me-keep" data-vip="1" id="meCodeVipWrap">
                             <label class="form-label" for="code_vip">Code VIP</label>
                             <select class="form-select" name="code_vip" id="code_vip"><?= $options_vip ?></select>
                         </div>
