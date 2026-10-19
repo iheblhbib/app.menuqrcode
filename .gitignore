@@ -1,0 +1,16 @@
+# Journaux et fichiers d'exécution
+error_log
+debug_log.txt
+planning-cron.last
+planning-cron.lock
+
+# Fichiers envoyés ou générés en production
+galerie/
+pdf/
+archive_qrcode/*.png
+
+# Divers
+__MACOSX/
+.DS_Store
+Thumbs.db
+*.stackdump

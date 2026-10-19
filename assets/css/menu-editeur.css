@@ -1,0 +1,721 @@
+/* =========================================================
+   Éditeur de menu — espace client (menu.php)
+   Toutes les classes sont préfixées .me- pour ne rien casser ailleurs.
+   ========================================================= */
+.me-page {
+    --me-brand: #2c5199;
+    --me-brand-soft: #eef3fc;
+    --me-ink: #012970;
+    --me-text: #3b4256;
+    --me-muted: #8a94a8;
+    --me-line: #e6ebf3;
+    --me-bg: #ffffff;
+    --me-radius: 12px;
+    --me-ok: #1f9d55;
+    --me-off: #c2c8d4;
+}
+
+.me-shell {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+
+/* ---------- Arbre ---------- */
+.me-tree {
+    position: sticky;
+    top: 80px;
+    max-height: calc(100vh - 100px);
+    display: flex;
+    flex-direction: column;
+    background: var(--me-bg);
+    border: 1px solid var(--me-line);
+    border-radius: var(--me-radius);
+    overflow: hidden;
+}
+.me-tree-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    border-bottom: 1px solid var(--me-line);
+}
+.me-search {
+    position: relative;
+    flex: 1;
+}
+.me-search i {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--me-muted);
+    font-size: 14px;
+}
+.me-search input {
+    width: 100%;
+    height: 36px;
+    padding: 0 10px 0 32px;
+    border: 1px solid var(--me-line);
+    border-radius: 8px;
+    background: #f7f9fc;
+    font-size: 13px;
+    outline: none;
+}
+.me-search input:focus {
+    border-color: var(--me-brand);
+    background: #fff;
+}
+.me-tree-body {
+    overflow-y: auto;
+    padding: 8px;
+    font-size: 14px;
+}
+.me-tree ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.me-tree ul ul {
+    margin-left: 14px;
+    padding-left: 8px;
+    border-left: 1px dashed var(--me-line);
+}
+.me-node {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 4px 6px;
+    border-radius: 8px;
+    color: var(--me-text);
+    cursor: pointer;
+    user-select: none;
+}
+.me-node:hover {
+    background: #f4f6fb;
+}
+.me-node.active {
+    background: var(--me-brand-soft);
+    color: var(--me-brand);
+    font-weight: 600;
+}
+.me-node.root {
+    font-weight: 600;
+    color: var(--me-ink);
+}
+.me-caret {
+    width: 18px;
+    flex: none;
+    text-align: center;
+    color: var(--me-muted);
+    transition: transform .15s;
+}
+.me-caret.open {
+    transform: rotate(90deg);
+}
+.me-caret.empty {
+    visibility: hidden;
+}
+.me-node-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.me-node.off .me-node-label {
+    color: var(--me-muted);
+    text-decoration: line-through;
+    text-decoration-color: #d5dae3;
+}
+.me-count {
+    flex: none;
+    min-width: 24px;
+    padding: 1px 7px;
+    border-radius: 20px;
+    background: #f0f3f8;
+    color: var(--me-muted);
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+}
+.me-node.active .me-count {
+    background: #fff;
+    color: var(--me-brand);
+}
+.me-clock {
+    color: #d48806;
+    font-size: 12px;
+}
+.me-tree mark {
+    padding: 0;
+    background: #fff3bf;
+    color: inherit;
+}
+.me-tree-backdrop {
+    display: none;   /* fond du tiroir mobile, hors grille */
+}
+.me-tree-empty {
+    padding: 16px 8px;
+    color: var(--me-muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+/* ---------- Contenu ---------- */
+.me-content {
+    min-width: 0;
+}
+.me-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+.me-crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--me-muted);
+}
+.me-crumbs a {
+    color: var(--me-muted);
+    text-decoration: none;
+    cursor: pointer;
+}
+.me-crumbs a:hover {
+    color: var(--me-brand);
+}
+.me-crumbs .sep {
+    opacity: .6;
+}
+.me-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+.me-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--me-ink);
+}
+.me-subtitle {
+    margin-top: 2px;
+    color: var(--me-muted);
+    font-size: 13px;
+}
+.me-subtitle .badge-off {
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: #f0f3f8;
+    color: var(--me-muted);
+    font-size: 11px;
+}
+.me-head-actions {
+    display: flex;
+    gap: 8px;
+}
+.me-head-actions .btn-primary {
+    background: var(--me-brand);
+    border-color: var(--me-brand);
+}
+
+.me-filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+.me-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--me-line);
+    border-radius: 20px;
+    background: #fff;
+    color: var(--me-text);
+    font-size: 13px;
+}
+.me-chip span {
+    min-width: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: #f0f3f8;
+    font-size: 11px;
+    font-weight: 600;
+}
+.me-chip.active {
+    border-color: var(--me-brand);
+    background: var(--me-brand);
+    color: #fff;
+}
+.me-chip.active span {
+    background: rgba(255, 255, 255, .25);
+}
+.me-hint {
+    margin-left: auto;
+    color: var(--me-muted);
+    font-size: 12px;
+}
+
+/* ---------- Cartes ---------- */
+.me-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.me-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--me-bg);
+    border: 1px solid var(--me-line);
+    border-radius: var(--me-radius);
+    transition: border-color .15s, box-shadow .15s;
+}
+.me-row:hover {
+    border-color: #cfd9ea;
+    box-shadow: 0 4px 14px rgba(1, 41, 112, .06);
+}
+.me-row.off {
+    background: #fafbfd;
+}
+.me-row.off .me-row-title,
+.me-row.off .me-thumb {
+    opacity: .55;
+}
+.me-row.ui-sortable-helper {
+    box-shadow: 0 10px 30px rgba(1, 41, 112, .18);
+}
+.me-row-placeholder {
+    height: 66px;
+    border: 2px dashed #cfd9ea;
+    border-radius: var(--me-radius);
+    background: #f7f9fc;
+}
+.me-handle {
+    flex: none;
+    width: 18px;
+    color: #b4bccb;
+    cursor: grab;
+    text-align: center;
+}
+.me-handle:active {
+    cursor: grabbing;
+}
+.me-thumb {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: #eef1f6 center / cover no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #b4bccb;
+    font-size: 18px;
+}
+.me-thumb.hidden-img {
+    outline: 2px dashed #dfe4ec;
+    outline-offset: -2px;
+}
+.me-row-main {
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+}
+.me-row-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--me-ink);
+    font-weight: 600;
+    font-size: 15px;
+}
+.me-row-title .txt {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.me-row-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+    margin-top: 2px;
+    color: var(--me-muted);
+    font-size: 12px;
+}
+.me-row-meta .desc {
+    max-width: 420px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.me-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 8px;
+    border-radius: 20px;
+    background: #fff7e6;
+    color: #ad6800;
+    font-size: 11px;
+    font-weight: 600;
+}
+.me-tag.paused {
+    background: #f0f3f8;
+    color: var(--me-muted);
+}
+.me-price {
+    flex: none;
+    min-width: 70px;
+    color: var(--me-ink);
+    font-weight: 700;
+    text-align: right;
+    white-space: nowrap;
+}
+.me-row-actions {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.me-icon-btn {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--me-muted);
+}
+.me-icon-btn:hover {
+    background: #f0f3f8;
+    color: var(--me-ink);
+}
+.me-row .dropdown-menu {
+    font-size: 14px;
+    border-color: var(--me-line);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(1, 41, 112, .12);
+}
+.me-row .dropdown-item i {
+    width: 20px;
+    color: var(--me-muted);
+}
+
+/* Interrupteur Actif */
+.me-switch {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    flex: none;
+    border: 0;
+    border-radius: 22px;
+    background: var(--me-off);
+    transition: background .15s;
+    padding: 0;
+}
+.me-switch::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
+    transition: transform .15s;
+}
+.me-switch.on {
+    background: var(--me-ok);
+}
+.me-switch.on::after {
+    transform: translateX(18px);
+}
+.me-switch:disabled {
+    opacity: .5;
+}
+
+/* États vides / chargement */
+.me-empty {
+    padding: 48px 20px;
+    border: 1px dashed #d5dce8;
+    border-radius: var(--me-radius);
+    background: #fff;
+    text-align: center;
+    color: var(--me-muted);
+}
+.me-empty i {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 32px;
+    color: #c5cedd;
+}
+.me-skeleton {
+    height: 34px;
+    margin: 6px 0;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #f0f3f8 25%, #f7f9fc 50%, #f0f3f8 75%);
+    background-size: 200% 100%;
+    animation: me-shimmer 1.2s infinite;
+}
+.me-list .me-skeleton {
+    height: 70px;
+    border-radius: var(--me-radius);
+}
+@keyframes me-shimmer {
+    to { background-position: -200% 0; }
+}
+.me-section-label {
+    margin: 10px 0 2px;
+    color: var(--me-muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+/* ---------- Panneau d'édition ---------- */
+.me-editor.offcanvas-end {
+    width: min(640px, 100vw);
+    border-left: 0;
+    box-shadow: -10px 0 40px rgba(1, 41, 112, .15);
+}
+.me-editor .offcanvas-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid #e6ebf3;
+}
+.me-editor .offcanvas-title {
+    color: #012970;
+    font-weight: 700;
+}
+.me-editor-kicker {
+    color: #8a94a8;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+.me-editor .offcanvas-body {
+    padding: 18px 22px;
+    background: #f6f8fc;
+}
+.me-editor-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 14px 22px;
+    border-top: 1px solid #e6ebf3;
+    background: #fff;
+}
+.me-editor-foot .btn-primary {
+    min-width: 140px;
+    background: #2c5199;
+    border-color: #2c5199;
+}
+.me-card {
+    margin-bottom: 14px;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid #e6ebf3;
+    border-radius: 12px;
+}
+.me-card-title {
+    margin-bottom: 12px;
+    color: #012970;
+    font-weight: 700;
+}
+.me-editor .form-label {
+    margin-bottom: 4px;
+    color: #3b4256;
+    font-size: 13px;
+    font-weight: 600;
+}
+.me-editor .form-control,
+.me-editor .form-select {
+    margin-bottom: 0;
+    border-color: #dfe5ef;
+    border-radius: 8px;
+}
+.me-lang-tabs {
+    gap: 4px;
+    margin: -4px 0 14px;
+    padding: 4px;
+    border-radius: 10px;
+    background: #f0f3f8;
+}
+.me-lang {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #5b6478;
+    font-size: 13px;
+    font-weight: 700;
+}
+.me-lang.active {
+    background: #fff;
+    color: #2c5199;
+    box-shadow: 0 1px 4px rgba(1, 41, 112, .12);
+}
+.me-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #f5a623;
+}
+.me-dot.ok {
+    background: #1f9d55;
+}
+.me-lang-pane {
+    display: none;
+}
+.me-lang-pane.active {
+    display: block;
+}
+.me-quill {
+    background: #fff;
+}
+.me-quill .ql-editor {
+    min-height: 110px;
+}
+.me-drop {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px;
+    border: 2px dashed #d5dce8;
+    border-radius: 12px;
+    background: #f9fbfe;
+    color: #8a94a8;
+    text-align: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color .15s, background .15s;
+}
+.me-drop:hover,
+.me-drop.drag {
+    border-color: #2c5199;
+    background: #eef3fc;
+}
+.me-drop img {
+    max-width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+}
+.me-drop img:not([hidden]) + .me-drop-empty {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: rgba(1, 41, 112, .75);
+    color: #fff;
+    font-size: 12px;
+}
+.me-drop img:not([hidden]) + .me-drop-empty br,
+.me-drop img:not([hidden]) + .me-drop-empty small {
+    display: none;
+}
+.me-drop-empty i {
+    margin-right: 4px;
+    font-size: 18px;
+}
+.me-planning .col-md-12:first-child {
+    display: none;   /* le <hr> du bloc planning est inutile dans une carte */
+}
+.me-planning h5 {
+    color: #012970;
+    font-size: 1rem;
+    font-weight: 700;
+}
+.me-field-error {
+    border-color: #dc3545 !important;
+}
+.me-editor .bootstrap-select .dropdown-toggle {
+    border: 1px solid #dfe5ef;
+    border-radius: 8px;
+    background: #fff;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1199.98px) {
+    .me-shell {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .me-tree {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 1046;
+        width: min(320px, 86vw);
+        max-height: none;
+        border-radius: 0;
+        transform: translateX(-105%);
+        transition: transform .2s ease;
+    }
+    .me-tree.open {
+        transform: none;
+    }
+    .me-tree-backdrop.open {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 1045;
+        background: rgba(1, 41, 112, .35);
+    }
+}
+@media (max-width: 575.98px) {
+    .me-row {
+        gap: 8px;
+        padding: 8px 8px 8px 6px;
+    }
+    .me-handle {
+        width: 12px;
+    }
+    .me-thumb {
+        width: 40px;
+        height: 40px;
+    }
+    .me-row-title {
+        font-size: 14px;
+    }
+    .me-row-meta .desc {
+        display: none;
+    }
+    .me-price {
+        min-width: 0;
+        font-size: 13px;
+    }
+    .me-icon-btn {
+        width: 28px;
+    }
+    .me-hint {
+        display: none !important;
+    }
+    .me-editor .offcanvas-body,
+    .me-editor .offcanvas-header,
+    .me-editor-foot {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+}
