@@ -11,6 +11,9 @@ include('planning-functions.php');
 
 $object = new application();
 
+include_once(__DIR__ . '/securite.php');
+securite_exiger_connexion($object);
+
 header('Content-Type: application/json; charset=utf-8');
 
 function out($data, $code = 200)

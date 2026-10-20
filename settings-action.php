@@ -4,6 +4,9 @@
       
     $object = new application();
 
+include_once(__DIR__ . '/securite.php');
+securite_exiger_connexion($object);
+
     if(isset($_POST["action"]))
     {
         if($_POST['action'] == 'update_market')

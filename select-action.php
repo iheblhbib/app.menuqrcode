@@ -9,6 +9,9 @@
     $PNG_WEB_DIR = '../app.menuqrcode.tn/archive_qrcode/';
       
     $object = new application();
+
+include_once(__DIR__ . '/securite.php');
+securite_exiger_connexion($object);
     
     if($_SESSION["id"]){
         
