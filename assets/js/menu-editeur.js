@@ -433,7 +433,7 @@
             if (!document.getElementById('meQuill_' + c)) { return; }
             quills[c] = new Quill('#meQuill_' + c, {
                 theme: 'snow',
-                placeholder: 'Ingrédients, préparation…',
+                placeholder: 'Ingr\u00e9dients, pr\u00e9paration\u2026',
                 modules: { toolbar: [['bold', 'italic', 'underline'], [{ list: 'ordered' }, { list: 'bullet' }], ['clean']] }
             });
         });
@@ -630,7 +630,7 @@
     }
 
     /* Un seul bouton (onglet FR) : traduit le nom, et pour un article la description, vers toutes les langues.
-       Le prix est recopié dans les langues où il est vide. */
+       Le prix FR est recopié dans toutes les langues (le prix ne dépend pas de la langue). */
     function translateAll() {
         var codes = CFG.langues.map(function (l) { return l.code; });
         var src = $.trim($('#libelle').val());
@@ -656,9 +656,10 @@
             });
         })];
         if (ed.level === 1) {
-            codes.forEach(function (c) {
-                if (!$.trim($('#prix' + c).val())) { $('#prix' + c).val($('#prix').val()).removeClass('me-field-error'); }
-            });
+            var prixFr = $.trim($('#prix').val());
+            if (prixFr) {
+                codes.forEach(function (c) { $('#prix' + c).val(prixFr).removeClass('me-field-error'); });
+            }
             var desc = quills.fr ? quills.fr.getText().trim() : '';
             if (desc) {
                 calls.push($.ajax({ url: url, method: 'POST', dataType: 'json', data: { text: desc, targets: codes } }).done(function (r) {
