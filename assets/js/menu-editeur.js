@@ -460,6 +460,15 @@
         $('#meForm .me-lang-pane').removeClass('active').filter('[data-lang="' + c + '"]').addClass('active');
     }
 
+    /* Le prix ne dépend pas de la langue : celui de l'onglet FR est recopié dans toutes les autres. */
+    function syncPrix() {
+        if (ed.level !== 1) { return; }
+        var prixFr = $.trim($('#prix').val());
+        CFG.langues.forEach(function (l) {
+            $('#prix' + l.code).val(prixFr).removeClass('me-field-error');
+        });
+    }
+
     function langComplete(c) {
         var suffix = c === 'fr' ? '' : c;
         if (!$.trim($('#libelle' + suffix).val())) { return false; }
@@ -553,6 +562,7 @@
         if (level === 1) {
             $('#prix').val(d.prix || '');
             setQuill('fr', d.description);
+            syncPrix();
             $('#type').val(d.type || 'product');
             if ($.fn.selectpicker) { $('#allergens').selectpicker('val', (d.allergens || []).map(String)); }
         }
@@ -575,6 +585,7 @@
 
     function validate() {
         var firstBad = null;
+        syncPrix();
         $('#meForm .me-field-error').removeClass('me-field-error');
         LANGS.forEach(function (c) {
             var suffix = c === 'fr' ? '' : c;
@@ -656,10 +667,7 @@
             });
         })];
         if (ed.level === 1) {
-            var prixFr = $.trim($('#prix').val());
-            if (prixFr) {
-                codes.forEach(function (c) { $('#prix' + c).val(prixFr).removeClass('me-field-error'); });
-            }
+            syncPrix();
             var desc = quills.fr ? quills.fr.getText().trim() : '';
             if (desc) {
                 calls.push($.ajax({ url: url, method: 'POST', dataType: 'json', data: { text: desc, targets: codes } }).done(function (r) {
@@ -768,6 +776,7 @@
         $('#meForm').on('click', '#meTranslateAll', translateAll);
         $('#meForm').on('input', 'input[data-fr], input[data-tr]', function () {
             $(this).removeClass('me-field-error');
+            if (this.id === 'prix') { syncPrix(); }
             updateDots();
         });
         $('#etat_prix').on('change', function () { $('#meNoteWrap').toggle(ed.level === 2 && this.value === '2'); });
