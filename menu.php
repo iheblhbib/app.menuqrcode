@@ -143,7 +143,7 @@ $v = function ($f) { return $f . '?v=' . @filemtime($f); };
                         <div class="me-only" data-levels="1">
                             <label class="form-label mt-3" for="prix<?= $c ?>">Prix <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <input type="text" class="form-control" name="prix<?= $c ?>" id="prix<?= $c ?>" maxlength="150" data-tr="prix">
+                                <input type="text" class="form-control" name="prix<?= $c ?>" id="prix<?= $c ?>" maxlength="150" data-tr="prix" readonly title="Même prix que l'onglet FR">
                                 <span class="input-group-text">DT</span>
                             </div>
                             <label class="form-label mt-3">Description</label>
